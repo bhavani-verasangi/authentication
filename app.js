@@ -94,13 +94,16 @@ app.post("/login", async (request, response) => {
 });
 
 //API 3
+
+
 app.put("/change-password", async (request, response) => {
   const { username, oldPassword, newPassword } = request.body;
-  const selectUserQuery = `SELECT * FROM user WHERE username = '${username}'`;
-  const databaseUser = await db.get(selectUserQuery);
+  const selectUserQuery = `
+        SELECT * FROM user WHERE username = '${username}';`;
+  const databaseUser = await database.get(selectUserQuery);
   if (databaseUser === undefined) {
     response.status(400);
-    response.send("Invalid User");
+    response.send("Invalid user");
   } else {
     const isPasswordMatch = await bcrypt.compare(
       oldPassword,
@@ -110,15 +113,10 @@ app.put("/change-password", async (request, response) => {
       if (validatePassword(newPassword)) {
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         const updatePasswordQuery = `
-          UPDATE
-            user
-          SET
-            password = '${hashedPassword}'
-          WHERE
-            username = '${username}';`;
-
+                UPDATE user
+                SET password = '${hashedPassword}'
+                WHERE username = '${username}';`;
         const user = await database.run(updatePasswordQuery);
-
         response.send("Password updated");
       } else {
         response.status(400);
@@ -126,7 +124,7 @@ app.put("/change-password", async (request, response) => {
       }
     } else {
       response.status(400);
-      response.send("Invalid Current Password");
+      response.send("Invalid current password");
     }
   }
 });
